@@ -7,10 +7,16 @@ terraform {
       # 1.0.5 and 1.0.10 but not 1.1.0. This is usually called the pessimistic constraint operator.
     }
   }
+
+  backend "s3" {
+    bucket = "jaskaran-learn-terraform-state"
+    key    = "terraform.tfstate"
+    region = "eu-west-2"
+  }
+
   required_version = ">= 0.14.9"
 }
 provider "aws" {
-  profile = "261219435789_SandboxAdmin"
   region  = "eu-west-2"
 }
 
@@ -49,7 +55,7 @@ resource "aws_route_table" "rtb" {
 
 # 4. Create a Subnet 
 resource "aws_subnet" "public_a" {
-  vpc_id     = aws_vpc.jaskaran_vpc.id
+  vpc_id     = aws_vpc.vpc.id
   cidr_block = "10.0.1.0/24"
 
   tags = {

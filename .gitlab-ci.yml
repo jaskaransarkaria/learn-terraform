@@ -1,0 +1,34 @@
+stages:          # List of stages for jobs, and their order of execution
+  - validate
+  - deploy
+
+.base-terraform:
+  image: 
+    name: "hashicorp/terraform"
+    entrypoint: [""]
+  before_script:
+    - export GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+    - export AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+    - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    - export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+    - terraform version
+      # rules:
+      #   - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      #     changes:
+      #     - *.tf
+
+lint-test-job: 
+  stage: validate
+  extends: .base-terrraform
+  script:
+    - echo "validating code..."
+    - terraform validate
+    - terraform fmt -check=true
+    - echo "terraform code valid and formatted"
+
+deploy-job:
+  stage: deploy  
+  extends: .base-terrraform
+  script:
+    - echo "Deploying application..."
+    - echo "Application successfully deployed."
