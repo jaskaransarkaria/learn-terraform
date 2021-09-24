@@ -158,6 +158,8 @@ resource "aws_ecs_task_definition" "task-def" {
     }
   ])
 
+  requires_compatibilities = ["FARGATE"]
+
   placement_constraints {
     type       = "memberOf"
     expression = "attribute:ecs.availability-zone in [eu-west-2a]"
