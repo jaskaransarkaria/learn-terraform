@@ -31,5 +31,5 @@ deploy-job:
   script:
     - terraform init
     - echo "Deploying application..."
-    - terraform apply
+    - terraform apply --auto-approve
     - echo "Application successfully deployed."
