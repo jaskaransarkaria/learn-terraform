@@ -126,8 +126,14 @@ resource "aws_ecs_service" "service" {
   name            = "learn-terraform-svc"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.task-def.arn
+  depends_on = [aws_ecs_task_definition.task-def]
+
   desired_count   = 1
-  launch_type = "FARGATE"
+
+  network_configuration {
+    subnets = [aws_subnet.public_a.id]
+    security_groups = [aws_security_group.allow_web.id]
+  }
 
   placement_constraints {
     type       = "memberOf"
@@ -142,11 +148,12 @@ resource "aws_ecs_service" "service" {
 # 8. Create an ECS task definition
 resource "aws_ecs_task_definition" "task-def" {
   family = "learn"
+  requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
       name      = "first"
       image     = "nginx"
-      cpu       = 10
+      cpu       = 256
       memory    = 512
       essential = true
       portMappings = [
@@ -158,14 +165,11 @@ resource "aws_ecs_task_definition" "task-def" {
     }
   ])
 
-  requires_compatibilities = ["FARGATE"]
-
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in [eu-west-2a]"
-  }
-
-    tags = {
+  cpu = "256"
+  memory = "512"
+  network_mode = "awsvpc"
+  
+  tags = {
       Owner = "jaskaran"
   }
 }
