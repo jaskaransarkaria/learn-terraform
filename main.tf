@@ -111,3 +111,60 @@ resource "aws_security_group" "allow_web" {
   }
 }
 
+# 6. Create an ECS cluster
+resource "aws_ecs_cluster" "cluster" {
+  name = "jaskaran-learn-terraform"
+  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
+
+  tags = {
+    Owner = "jaskaran"
+  }
+}
+
+# 7. Create an ECS service
+resource "aws_ecs_service" "service" {
+  name            = "learn-terraform-svc"
+  cluster         = aws_ecs_cluster.cluster.id
+  task_definition = aws_ecs_task_definition.task-def.arn
+  desired_count   = 1
+  launch_type = "FARGATE"
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in [eu-west-2a]"
+  }
+
+  tags = {
+    Owner = "jaskaran"
+  }
+}
+
+# 8. Create an ECS task definition
+resource "aws_ecs_task_definition" "task-def" {
+  family = "learn"
+  container_definitions = jsonencode([
+    {
+      name      = "first"
+      image     = "nginx"
+      cpu       = 10
+      memory    = 512
+      essential = true
+      portMappings = [
+        {
+          containerPort = 443
+          hostPort      = 443
+        }
+      ]
+    }
+  ])
+
+  placement_constraints {
+    type       = "memberOf"
+    expression = "attribute:ecs.availability-zone in [eu-west-2a]"
+  }
+
+    tags = {
+      Owner = "jaskaran"
+  }
+}
+
