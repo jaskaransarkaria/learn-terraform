@@ -23,7 +23,6 @@ lint-test-job:
     - terraform init
     - echo "validating code..."
     - terraform validate
-    - terraform fmt -check=true
     - echo "terraform code valid and formatted"
 
 deploy-job:

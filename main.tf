@@ -17,7 +17,7 @@ terraform {
   required_version = ">= 0.14.9"
 }
 provider "aws" {
-  region  = "eu-west-2"
+  region = "eu-west-2"
 }
 
 # 1. Create vpc
@@ -44,9 +44,9 @@ resource "aws_route_table" "rtb" {
   vpc_id = aws_vpc.vpc.id
 
   route {
-      cidr_block = "0.0.0.0/0"
-      gateway_id = aws_internet_gateway.igw.id
-    }
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
 
   tags = {
     Owner = "jaskaran"
@@ -76,28 +76,28 @@ resource "aws_security_group" "allow_web" {
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
-      description = "TLS"
-      from_port   = 443
-      to_port     = 443
-      protocol    = "tcp"
-      cidr_blocks = [aws_vpc.vpc.cidr_block]
-    }
+    description = "TLS"
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
+  }
 
   ingress {
-      description = "HTTP"
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-      cidr_blocks = [aws_vpc.vpc.cidr_block]
-    }
+    description = "HTTP"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
+  }
 
   ingress {
-      description = "SSH"
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-      cidr_blocks = [aws_vpc.vpc.cidr_block]
-    }
+    description = "SSH"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.vpc.cidr_block]
+  }
 
   egress {
     from_port   = 0
