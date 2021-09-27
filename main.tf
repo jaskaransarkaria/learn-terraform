@@ -54,20 +54,6 @@ resource "aws_route_table" "rtb" {
   }
 }
 
-# # Create NAT gateway so subnets can connect to the internet
-# resource "aws_nat_gateway" "nat" {
-#   allocation_id = aws_eip..id
-#   subnet_id     = aws_subnet.public_a.id
-# 
-#   tags = {
-#     Owner = "jaskaran"
-#   }
-# 
-#   # To ensure proper ordering, it is recommended to add an explicit dependency
-#   # on the Internet Gateway for the VPC.
-#   depends_on = [aws_internet_gateway.igw]
-# }
-
 # 4. Create a Subnet 
 resource "aws_subnet" "public_a" {
   vpc_id     = aws_vpc.vpc.id
@@ -86,16 +72,6 @@ resource "aws_main_route_table_association" "main_rtb_association" {
   route_table_id = aws_route_table.rtb.id
 }
 
-# resource "aws_route_table_association" "rtb_association_a" {
-#   route_table_id = aws_route_table.rtb.id
-#   subnet_id = aws_subnet.public_a.id
-# }
-
-# resource "aws_route_table_association" "rtb_association_b" {
-#   route_table_id = aws_route_table.rtb.id
-#   gateway_id = aws_internet_gateway.igw.id
-# }
-
 # 6. Create Security Group to allow port 22,80,443
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
@@ -103,25 +79,9 @@ resource "aws_security_group" "allow_web" {
   vpc_id      = aws_vpc.vpc.id
 
   ingress {
-    description = "TLS"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.vpc.cidr_block]
-  }
-
-  ingress {
     description = "HTTP"
     from_port   = 80
     to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.vpc.cidr_block]
-  }
-
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = [aws_vpc.vpc.cidr_block]
   }
