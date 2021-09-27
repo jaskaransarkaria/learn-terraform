@@ -49,6 +49,7 @@ deploy-job:
   variables:
     PLAN_FILE: plan-ws.tfplan
   script:
+    - terraform init
     - echo "Deploying application..."
     - terraform apply --auto-approve ${PLAN_FILE}
     - echo "Application successfully deployed."
