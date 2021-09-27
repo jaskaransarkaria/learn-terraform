@@ -48,15 +48,32 @@ resource "aws_route_table" "rtb" {
     gateway_id = aws_internet_gateway.igw.id
   }
 
+
   tags = {
     Owner = "jaskaran"
   }
 }
 
+# # Create NAT gateway so subnets can connect to the internet
+# resource "aws_nat_gateway" "nat" {
+#   allocation_id = aws_eip..id
+#   subnet_id     = aws_subnet.public_a.id
+# 
+#   tags = {
+#     Owner = "jaskaran"
+#   }
+# 
+#   # To ensure proper ordering, it is recommended to add an explicit dependency
+#   # on the Internet Gateway for the VPC.
+#   depends_on = [aws_internet_gateway.igw]
+# }
+
 # 4. Create a Subnet 
 resource "aws_subnet" "public_a" {
   vpc_id     = aws_vpc.vpc.id
   cidr_block = "10.0.1.0/24"
+  availability_zone = "eu-west-2a"
+  map_public_ip_on_launch = true
 
   tags = {
     Owner = "jaskaran"
@@ -64,10 +81,20 @@ resource "aws_subnet" "public_a" {
 }
 
 # 5. Associate subnet with Route Table
-resource "aws_main_route_table_association" "rtb_association" {
+resource "aws_main_route_table_association" "main_rtb_association" {
   vpc_id         = aws_vpc.vpc.id
   route_table_id = aws_route_table.rtb.id
 }
+
+# resource "aws_route_table_association" "rtb_association_a" {
+#   route_table_id = aws_route_table.rtb.id
+#   subnet_id = aws_subnet.public_a.id
+# }
+
+# resource "aws_route_table_association" "rtb_association_b" {
+#   route_table_id = aws_route_table.rtb.id
+#   gateway_id = aws_internet_gateway.igw.id
+# }
 
 # 6. Create Security Group to allow port 22,80,443
 resource "aws_security_group" "allow_web" {
@@ -127,17 +154,13 @@ resource "aws_ecs_service" "service" {
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.task-def.arn
   depends_on = [aws_ecs_task_definition.task-def]
+  launch_type = "FARGATE"
 
   desired_count   = 1
 
   network_configuration {
     subnets = [aws_subnet.public_a.id]
     security_groups = [aws_security_group.allow_web.id]
-  }
-
-  placement_constraints {
-    type       = "memberOf"
-    expression = "attribute:ecs.availability-zone in [eu-west-2a]"
   }
 
   tags = {
