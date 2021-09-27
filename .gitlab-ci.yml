@@ -15,8 +15,6 @@ stages:          # List of stages for jobs, and their order of execution
   only:
     refs: 
         - main
-    changes:
-        - main.tf
 
 lint-test-job: 
   stage: validate-and-format

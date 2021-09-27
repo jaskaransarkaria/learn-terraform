@@ -9,24 +9,24 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "jaskaran-learn-terraform-state"
+    bucket = var.s3_bucket
     key    = "terraform.tfstate"
-    region = "eu-west-2"
+    region = var.region
   }
 
   required_version = ">= 0.14.9"
 }
 provider "aws" {
-  region = "eu-west-2"
+  region = var.region
 }
 
 # 1. Create vpc
 resource "aws_vpc" "vpc" {
-  cidr_block       = "10.0.0.0/16"
+  cidr_block       = var.vpc_cidr
   instance_tenancy = "default"
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -35,7 +35,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -50,19 +50,19 @@ resource "aws_route_table" "rtb" {
 
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
 # 4. Create a Subnet 
 resource "aws_subnet" "public_a" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "eu-west-2a"
+  cidr_block              = var.subnet_cidr_1
+  availability_zone       = var.region_az
   map_public_ip_on_launch = true
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -94,7 +94,7 @@ resource "aws_security_group" "allow_web" {
   }
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -104,7 +104,7 @@ resource "aws_ecs_cluster" "cluster" {
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -124,7 +124,7 @@ resource "aws_ecs_service" "service" {
   }
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 
@@ -153,7 +153,7 @@ resource "aws_ecs_task_definition" "task-def" {
   network_mode = "awsvpc"
 
   tags = {
-    Owner = "jaskaran"
+    Owner = var.tags.Owner
   }
 }
 

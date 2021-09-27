@@ -10,7 +10,6 @@ is stored remotely in an s3 bucket. Deployment is handled by Gitlab CI/CD.
 
 ## Next steps:
 
-- [  ] implement terraform var
 - [  ] research terraform modules
 - [  ] switch the ECS containers to be deployed on EC2 and invistigate 
 implementing Anisible
