@@ -1,5 +1,5 @@
 stages:          # List of stages for jobs, and their order of execution
-  - validate
+  - validate-and-format
   - tf-plan
   - deploy
 
@@ -12,10 +12,11 @@ stages:          # List of stages for jobs, and their order of execution
     - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     - export AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
     - terraform version
-      # rules:
-      #   - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
-      #     changes:
-      #     - *.tf
+  only:
+    refs: 
+      - main
+    changes:
+      - *.tf
 
 lint-test-job: 
   stage: validate-and-format
