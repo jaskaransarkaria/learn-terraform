@@ -9,92 +9,21 @@ terraform {
   }
 
   backend "s3" {
-    bucket = var.s3_bucket
+    bucket = "jaskaran-learn-terraform-state"
     key    = "terraform.tfstate"
-    region = var.region
+    region = "eu-west-2"
   }
 
   required_version = ">= 0.14.9"
 }
 provider "aws" {
-  region = var.region
+  region = "eu-west-2"
 }
 
-# 1. Create vpc
-resource "aws_vpc" "vpc" {
-  cidr_block       = var.vpc_cidr
-  instance_tenancy = "default"
 
-  tags = {
-    Owner = var.tags.Owner
-  }
-}
-
-# 2. Create Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.vpc.id
-
-  tags = {
-    Owner = var.tags.Owner
-  }
-}
-
-# 3. Create Custom Route Table
-resource "aws_route_table" "rtb" {
-  vpc_id = aws_vpc.vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-
-  tags = {
-    Owner = var.tags.Owner
-  }
-}
-
-# 4. Create a Subnet 
-resource "aws_subnet" "public_a" {
-  vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.subnet_cidr_1
-  availability_zone       = var.region_az
-  map_public_ip_on_launch = true
-
-  tags = {
-    Owner = var.tags.Owner
-  }
-}
-
-# 5. Associate subnet with Route Table
-resource "aws_main_route_table_association" "main_rtb_association" {
-  vpc_id         = aws_vpc.vpc.id
-  route_table_id = aws_route_table.rtb.id
-}
-
-# 6. Create Security Group to allow port 22,80,443
-resource "aws_security_group" "allow_web" {
-  name        = "allow_web_traffic"
-  description = "Allow web inbound traffic"
-  vpc_id      = aws_vpc.vpc.id
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.vpc.cidr_block]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1" # means any
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Owner = var.tags.Owner
+variable tags {
+  default = {
+    Owner = "jaskaran"
   }
 }
 
@@ -108,6 +37,10 @@ resource "aws_ecs_cluster" "cluster" {
   }
 }
 
+module "vpc" {
+  source = "./tf-modules/vpc"
+}
+
 # 7. Create an ECS service
 resource "aws_ecs_service" "service" {
   name            = "learn-terraform-svc"
@@ -119,8 +52,8 @@ resource "aws_ecs_service" "service" {
   desired_count = 1
 
   network_configuration {
-    subnets         = [aws_subnet.public_a.id]
-    security_groups = [aws_security_group.allow_web.id]
+    subnets         = [module.vpc.public_a.id]
+    security_groups = [module.vpc.allow_web.id]
   }
 
   tags = {
