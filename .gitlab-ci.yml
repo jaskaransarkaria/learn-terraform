@@ -1,6 +1,6 @@
 stages:          # List of stages for jobs, and their order of execution
   - validate-and-format
-  - tf-plan
+  - terraform:plan
   - deploy
 
 .base-terraform:
@@ -14,9 +14,9 @@ stages:          # List of stages for jobs, and their order of execution
     - terraform version
   only:
     refs: 
-      - main
+        - main
     changes:
-      - *.tf
+        - main.tf
 
 lint-test-job: 
   stage: validate-and-format
