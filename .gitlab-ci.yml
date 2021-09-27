@@ -1,5 +1,6 @@
 stages:          # List of stages for jobs, and their order of execution
   - validate
+  - tf-plan
   - deploy
 
 .base-terraform:
@@ -17,19 +18,37 @@ stages:          # List of stages for jobs, and their order of execution
       #     - *.tf
 
 lint-test-job: 
-  stage: validate
+  stage: validate-and-format
   extends: .base-terraform
   script:
     - terraform init
     - echo "validating code..."
     - terraform validate
+    - terraform fmt -check
     - echo "terraform code valid and formatted"
+
+tf-plan:
+  stage: terraform:plan
+  extends: .base-terraform
+  variables:
+    WORKSPACE: "plan-ws"
+  script:
+    - terraform init -input=false
+    - terraform plan -out=${WORKSPACE}.tfplan
+  artifacts:
+    name: ${WORKSPACE}
+    paths:
+      - ./*.tfplan
+      - .terraform
+    expire_in: 1 week
 
 deploy-job:
   stage: deploy  
   extends: .base-terraform
+  variables:
+    PLAN_FILE: plan-ws.tfplan
   script:
-    - terraform init
     - echo "Deploying application..."
-    - terraform apply --auto-approve
+    - terraform apply --auto-approve ${PLAN_FILE}
     - echo "Application successfully deployed."
+

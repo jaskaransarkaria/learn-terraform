@@ -56,9 +56,9 @@ resource "aws_route_table" "rtb" {
 
 # 4. Create a Subnet 
 resource "aws_subnet" "public_a" {
-  vpc_id     = aws_vpc.vpc.id
-  cidr_block = "10.0.1.0/24"
-  availability_zone = "eu-west-2a"
+  vpc_id                  = aws_vpc.vpc.id
+  cidr_block              = "10.0.1.0/24"
+  availability_zone       = "eu-west-2a"
   map_public_ip_on_launch = true
 
   tags = {
@@ -100,7 +100,7 @@ resource "aws_security_group" "allow_web" {
 
 # 6. Create an ECS cluster
 resource "aws_ecs_cluster" "cluster" {
-  name = "jaskaran-learn-terraform"
+  name               = "jaskaran-learn-terraform"
   capacity_providers = ["FARGATE", "FARGATE_SPOT"]
 
   tags = {
@@ -113,13 +113,13 @@ resource "aws_ecs_service" "service" {
   name            = "learn-terraform-svc"
   cluster         = aws_ecs_cluster.cluster.id
   task_definition = aws_ecs_task_definition.task-def.arn
-  depends_on = [aws_ecs_task_definition.task-def]
-  launch_type = "FARGATE"
+  depends_on      = [aws_ecs_task_definition.task-def]
+  launch_type     = "FARGATE"
 
-  desired_count   = 1
+  desired_count = 1
 
   network_configuration {
-    subnets = [aws_subnet.public_a.id]
+    subnets         = [aws_subnet.public_a.id]
     security_groups = [aws_security_group.allow_web.id]
   }
 
@@ -130,7 +130,7 @@ resource "aws_ecs_service" "service" {
 
 # 8. Create an ECS task definition
 resource "aws_ecs_task_definition" "task-def" {
-  family = "learn"
+  family                   = "learn"
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {
@@ -148,12 +148,12 @@ resource "aws_ecs_task_definition" "task-def" {
     }
   ])
 
-  cpu = "256"
-  memory = "512"
+  cpu          = "256"
+  memory       = "512"
   network_mode = "awsvpc"
-  
+
   tags = {
-      Owner = "jaskaran"
+    Owner = "jaskaran"
   }
 }
 
