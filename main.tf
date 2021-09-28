@@ -23,19 +23,19 @@ provider "aws" {
 
 
 module "vpc" {
-  source = "./tf-modules/vpc"
-  region_az = local.region_az
-  vpc_cidr = local.vpc_cidr
+  source        = "./tf-modules/vpc"
+  region_az     = local.region_az
+  vpc_cidr      = local.vpc_cidr
   subnet_cidr_1 = local.subnet_cidr_1
-  owner = local.owner
+  owner         = local.owner
 }
 
 module "ecs_cluster_svc_and_task" {
-  source = "./tf-modules/ecs-fargate-svc-and-task"
+  source     = "./tf-modules/ecs-fargate-svc-and-task"
   stack_name = local.stack_name
-  owner = local.owner
-  image = local.image
-  subnet_id = module.vpc.public_a.id
-  sg_id = module.vpc.allow_web.id
+  owner      = local.owner
+  image      = local.image
+  subnet_id  = module.vpc.public_a.id
+  sg_id      = module.vpc.allow_web.id
 }
 

@@ -24,7 +24,7 @@ variable "vpc_cidr" {
 }
 
 variable "subnet_cidr_1" {
-  type = string
+  type        = string
   description = "The cidr range for a particular subnet (in future this should be an object containing all subnets)"
 }
 
