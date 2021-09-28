@@ -1,23 +1,10 @@
-variable owner {}
-
-variable prefix {}
-
-variable image {}
-
-
-variable subnet_id {}
-
-variable sg_id {}
-
 module "cluster" {
   source = "../ecs-cluster-fargate"
-  cluster_suffix = var.prefix
-  owner = var.owner
 }
 
 # 7. Create an ECS service
 resource "aws_ecs_service" "service" {
-  name            = "${var.prefix}-svc"
+  name            = "${var.stack_name}-svc"
   cluster         = module.cluster.ecs_cluster.id
   task_definition = aws_ecs_task_definition.task-def.arn
   depends_on      = [aws_ecs_task_definition.task-def]
@@ -38,7 +25,7 @@ resource "aws_ecs_service" "service" {
 
 # 8. Create an ECS task definition
 resource "aws_ecs_task_definition" "task-def" {
-  family                   = var.prefix
+  family                   = var.stack_name
   requires_compatibilities = ["FARGATE"]
   container_definitions = jsonencode([
     {

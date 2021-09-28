@@ -16,31 +16,25 @@ terraform {
 
   required_version = ">= 0.14.9"
 }
+
 provider "aws" {
   region = "eu-west-2"
 }
 
-variable owner {
-  default = "Jazz"
-}
-
-variable stack_name {
-  default = "terraform-with-modules"
-}
 
 module "vpc" {
   source = "./tf-modules/vpc"
-  region_az = "eu-west-2a"
-  vpc_cidr = "10.0.0.0/16"
-  subnet_cidr_1 = "10.0.1.0/24"
-  owner = var.owner
+  region_az = local.region_az
+  vpc_cidr = local.vpc_cidr
+  subnet_cidr_1 = local.subnet_cidr_1
+  owner = local.owner
 }
 
 module "ecs_cluster_svc_and_task" {
   source = "./tf-modules/ecs-fargate-svc-and-task"
-  prefix = var.stack_name
-  owner = var.owner
-  image = "nginx"
+  stack_name = local.stack_name
+  owner = local.owner
+  image = local.image
   subnet_id = module.vpc.public_a.id
   sg_id = module.vpc.allow_web.id
 }

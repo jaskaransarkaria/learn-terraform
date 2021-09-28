@@ -1,11 +1,3 @@
-variable region_az {}
-
-variable vpc_cidr {}
-
-variable subnet_cidr_1 {}
-
-variable owner {}
-
 # 1. Create vpc
 resource "aws_vpc" "vpc" {
   cidr_block       = var.vpc_cidr
