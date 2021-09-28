@@ -20,73 +20,28 @@ provider "aws" {
   region = "eu-west-2"
 }
 
-
-variable tags {
-  default = {
-    Owner = "jaskaran"
-  }
+variable owner {
+  default = "Jazz"
 }
 
-# 6. Create an ECS cluster
-resource "aws_ecs_cluster" "cluster" {
-  name               = "jaskaran-learn-terraform"
-  capacity_providers = ["FARGATE", "FARGATE_SPOT"]
-
-  tags = {
-    Owner = var.tags.Owner
-  }
+variable stack_name {
+  default = "terraform-with-modules"
 }
 
 module "vpc" {
   source = "./tf-modules/vpc"
+  region_az = "eu-west-2a"
+  vpc_cidr = "10.0.0.0/16"
+  subnet_cidr_1 = "10.0.1.0/24"
+  owner = var.owner
 }
 
-# 7. Create an ECS service
-resource "aws_ecs_service" "service" {
-  name            = "learn-terraform-svc"
-  cluster         = aws_ecs_cluster.cluster.id
-  task_definition = aws_ecs_task_definition.task-def.arn
-  depends_on      = [aws_ecs_task_definition.task-def]
-  launch_type     = "FARGATE"
-
-  desired_count = 1
-
-  network_configuration {
-    subnets         = [module.vpc.public_a.id]
-    security_groups = [module.vpc.allow_web.id]
-  }
-
-  tags = {
-    Owner = var.tags.Owner
-  }
-}
-
-# 8. Create an ECS task definition
-resource "aws_ecs_task_definition" "task-def" {
-  family                   = "learn"
-  requires_compatibilities = ["FARGATE"]
-  container_definitions = jsonencode([
-    {
-      name      = "first"
-      image     = "nginx"
-      cpu       = 256
-      memory    = 512
-      essential = true
-      portMappings = [
-        {
-          containerPort = 443
-          hostPort      = 443
-        }
-      ]
-    }
-  ])
-
-  cpu          = "256"
-  memory       = "512"
-  network_mode = "awsvpc"
-
-  tags = {
-    Owner = var.tags.Owner
-  }
+module "ecs_cluster_svc_and_task" {
+  source = "./tf-modules/ecs-fargate-svc-and-task"
+  prefix = var.stack_name
+  owner = var.owner
+  image = "nginx"
+  subnet_id = module.vpc.public_a.id
+  sg_id = module.vpc.allow_web.id
 }
 

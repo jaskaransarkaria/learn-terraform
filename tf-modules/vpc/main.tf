@@ -1,22 +1,10 @@
+variable region_az {}
 
-variable region_az {
-  default =  "eu-west-2a"
-}
+variable vpc_cidr {}
 
-variable vpc_cidr {
-  default = "10.0.0.0/16"
-}
+variable subnet_cidr_1 {}
 
-variable subnet_cidr_1 {
-  default = "10.0.1.0/24"
-
-}
-
-variable tags {
-  default = {
-    Owner = "jaskaran"
-  }
-}
+variable owner {}
 
 # 1. Create vpc
 resource "aws_vpc" "vpc" {
@@ -24,7 +12,7 @@ resource "aws_vpc" "vpc" {
   instance_tenancy = "default"
 
   tags = {
-    Owner = var.tags.Owner
+    Owner = var.owner
   }
 }
 
@@ -33,7 +21,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.vpc.id
 
   tags = {
-    Owner = var.tags.Owner
+    Owner = var.owner
   }
 }
 
@@ -48,7 +36,7 @@ resource "aws_route_table" "rtb" {
 
 
   tags = {
-    Owner = var.tags.Owner
+    Owner = var.owner
   }
 }
 
@@ -60,7 +48,7 @@ resource "aws_subnet" "public_a" {
   map_public_ip_on_launch = true
 
   tags = {
-    Owner = var.tags.Owner
+    Owner = var.owner
   }
 }
 
@@ -70,7 +58,8 @@ resource "aws_main_route_table_association" "main_rtb_association" {
   route_table_id = aws_route_table.rtb.id
 }
 
-# 6. Create Security Group to allow port 22,80,443
+
+# 6. Create Security Group to allow port 80
 resource "aws_security_group" "allow_web" {
   name        = "allow_web_traffic"
   description = "Allow web inbound traffic"
@@ -81,7 +70,7 @@ resource "aws_security_group" "allow_web" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = [aws_vpc.vpc.cidr_block]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -92,6 +81,6 @@ resource "aws_security_group" "allow_web" {
   }
 
   tags = {
-    Owner = var.tags.Owner
+    Owner = var.owner
   }
 }
