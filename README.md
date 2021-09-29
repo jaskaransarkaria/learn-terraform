@@ -11,6 +11,9 @@ push your code to github and CI/CD will handle deployment.
 
 ## Useful commands
 
+Before running these commands it is _important_ to update the `locals.tf` file to point to your
+stack and make sure you have exported the relevant AWS credentials in your terminal.
+
 - terraform fmt -write=true **format your terraform code, use this if it is failing the lint step**
 - terraform validate **validate that you have valid terraform**
 - terraform plan **preview what infrastructure changes will be applied**
