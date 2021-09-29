@@ -1,5 +1,7 @@
 module "cluster" {
   source = "../ecs-cluster-fargate"
+  owner = var.owner
+  stack_name = var.stack_name
 }
 
 # 7. Create an ECS service
